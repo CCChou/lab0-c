@@ -14,6 +14,7 @@ queue_t *q_new()
     queue_t *q = malloc(sizeof(queue_t));
     if (q) {
         q->head = NULL;
+        q->tail = NULL;
         q->size = 0;
     }
     return q;
@@ -60,6 +61,9 @@ bool q_insert_head(queue_t *q, char *s)
     memset(newh->value, '\0', len);
     strncpy(newh->value, s, len);
 
+    if (!q->tail) {
+        q->tail = newh;
+    }
     newh->next = q->head;
     q->head = newh;
     q->size++;
@@ -90,11 +94,13 @@ bool q_insert_tail(queue_t *q, char *s)
     memset(newh->value, '\0', len);
     strncpy(newh->value, s, len);
 
-    list_ele_t *cursor = q->head;
-    while (cursor->next) {
-        cursor = cursor->next;
+    if (q->tail) {
+        q->tail->next = newh;
+        q->tail = newh;
+    } else {
+        q->head = newh;
+        q->tail = newh;
     }
-    cursor->next = newh;
     q->size++;
     return true;
 }
@@ -122,6 +128,7 @@ bool q_remove_head(queue_t *q, char *sp, size_t bufsize)
     temp->next = NULL;
     free(temp->value);
     free(temp);
+    q->size--;
     return true;
 }
 
@@ -146,8 +153,26 @@ int q_size(queue_t *q)
  */
 void q_reverse(queue_t *q)
 {
-    /* TODO: You need to write the code for this function */
-    /* TODO: Remove the above comment when you are about to implement. */
+    if (!q) {
+        return;
+    }
+
+    list_ele_t *reverse = NULL;
+    list_ele_t *cursor = q->head;
+    while (cursor) {
+        list_ele_t *temp = cursor;
+        cursor = cursor->next;
+
+        if (!reverse) {
+            temp->next = NULL;
+            reverse = temp;
+            q->tail = temp;
+        } else {
+            temp->next = reverse;
+            reverse = temp;
+        }
+    }
+    q->head = reverse;
 }
 
 /*

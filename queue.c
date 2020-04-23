@@ -22,8 +22,18 @@ queue_t *q_new()
 /* Free all storage used by queue */
 void q_free(queue_t *q)
 {
-    /* TODO: How about freeing the list elements and the strings? */
-    /* Free queue structure */
+    if (!q) {
+        return;
+    }
+
+    list_ele_t *cursor = q->head;
+    while (cursor) {
+        list_ele_t *temp = cursor;
+        cursor = cursor->next;
+        temp->next = NULL;
+        free(temp->value);
+        free(temp);
+    }
     free(q);
 }
 
@@ -41,14 +51,14 @@ bool q_insert_head(queue_t *q, char *s)
         return false;
     }
 
-    newh->value = malloc(sizeof(s));
+    int len = strlen(s) + 1;
+    newh->value = malloc(sizeof(char) * len);
     if (!newh->value) {
         free(newh);
         return false;
     }
-    int newh_value_len = strlen(newh->value);
-    memset(newh->value, '\0', newh_value_len);
-    strncpy(newh->value, s, newh_value_len);
+    memset(newh->value, '\0', len);
+    strncpy(newh->value, s, len);
 
     newh->next = q->head;
     q->head = newh;
@@ -71,14 +81,14 @@ bool q_insert_tail(queue_t *q, char *s)
     }
     newh->next = NULL;
 
-    newh->value = malloc(sizeof(s));
+    int len = strlen(s) + 1;
+    newh->value = malloc(len);
     if (!newh->value) {
         free(newh);
         return false;
     }
-    int newh_value_len = strlen(newh->value);
-    memset(newh->value, '\0', newh_value_len);
-    strncpy(newh->value, s, newh_value_len);
+    memset(newh->value, '\0', len);
+    strncpy(newh->value, s, len);
 
     list_ele_t *cursor = q->head;
     while (cursor->next) {
@@ -99,9 +109,19 @@ bool q_insert_tail(queue_t *q, char *s)
  */
 bool q_remove_head(queue_t *q, char *sp, size_t bufsize)
 {
-    /* TODO: You need to fix up this code. */
-    /* TODO: Remove the above comment when you are about to implement. */
+    if (!q || !q->head) {
+        return false;
+    }
+
+    list_ele_t *temp = q->head;
+    if (sp) {
+        memset(sp, '\0', strlen(sp) + 1);
+        strncpy(sp, temp->value, bufsize - 1);
+    }
     q->head = q->head->next;
+    temp->next = NULL;
+    free(temp->value);
+    free(temp);
     return true;
 }
 

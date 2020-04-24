@@ -30,10 +30,9 @@ void q_free(queue_t *q)
         return;
     }
 
-    list_ele_t *cursor = q->head;
-    while (cursor) {
-        list_ele_t *temp = cursor;
-        cursor = cursor->next;
+    while (q->head) {
+        list_ele_t *temp = q->head;
+        q->head = q->head->next;
         temp->next = NULL;
         free(temp->value);
         free(temp);
@@ -160,20 +159,14 @@ void q_reverse(queue_t *q)
         return;
     }
 
+    q->tail = q->head;
     list_ele_t *reverse = NULL;
     list_ele_t *cursor = q->head;
     while (cursor) {
         list_ele_t *temp = cursor;
         cursor = cursor->next;
-
-        if (!reverse) {
-            temp->next = NULL;
-            reverse = temp;
-            q->tail = temp;
-        } else {
-            temp->next = reverse;
-            reverse = temp;
-        }
+        temp->next = reverse;
+        reverse = temp;
     }
     q->head = reverse;
 }

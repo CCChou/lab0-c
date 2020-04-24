@@ -5,8 +5,8 @@
 #include "harness.h"
 #include "queue.h"
 
-// define private function
-list_ele_t *sort(list_ele_t *start);
+list_ele_t *sort(list_ele_t *head);
+list_ele_t *merge(list_ele_t *left, list_ele_t *right);
 
 /*
  * Create empty queue.
@@ -181,36 +181,42 @@ void q_sort(queue_t *q)
     q->head = sort(q->head);
 }
 
-list_ele_t *sort(list_ele_t *start)
+list_ele_t *sort(list_ele_t *head)
 {
-    if (!start || !start->next) {
-        return start;
+    if (!head || !head->next) {
+        return head;
     }
-    list_ele_t *left = start;
-    list_ele_t *right = left->next;
-    left->next = NULL;
 
-    left = sort(left);
-    right = sort(right);
+    list_ele_t *fast = head->next;
+    list_ele_t *slow = head;
 
-    for (list_ele_t *merge = NULL; left || right;) {
-        if (!right || (left && strcmp(left->value, right->value) < 0)) {
-            if (!merge) {
-                start = merge = left;
-            } else {
-                merge->next = left;
-                merge = merge->next;
-            }
-            left = left->next;
-        } else {
-            if (!merge) {
-                start = merge = right;
-            } else {
-                merge->next = right;
-                merge = merge->next;
-            }
-            right = right->next;
-        }
+    while (fast && fast->next) {
+        slow = slow->next;
+        fast = fast->next->next;
     }
-    return start;
+    fast = slow->next;
+    slow->next = NULL;
+
+    list_ele_t *left = sort(head);
+    list_ele_t *right = sort(fast);
+
+    return merge(left, right);
+}
+
+list_ele_t *merge(list_ele_t *left, list_ele_t *right)
+{
+    if (!left) {
+        return right;
+    }
+    if (!right) {
+        return left;
+    }
+
+    if (strcmp(left->value, right->value) < 0) {
+        left->next = merge(left->next, right);
+        return left;
+    } else {
+        right->next = merge(left, right->next);
+        return right;
+    }
 }

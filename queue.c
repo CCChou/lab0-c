@@ -5,6 +5,9 @@
 #include "harness.h"
 #include "queue.h"
 
+// define private function
+list_ele_t *sort(list_ele_t *start);
+
 /*
  * Create empty queue.
  * Return NULL if could not allocate space.
@@ -182,6 +185,39 @@ void q_reverse(queue_t *q)
  */
 void q_sort(queue_t *q)
 {
-    /* TODO: You need to write the code for this function */
-    /* TODO: Remove the above comment when you are about to implement. */
+    q->head = sort(q->head);
+}
+
+list_ele_t *sort(list_ele_t *start)
+{
+    if (!start || !start->next) {
+        return start;
+    }
+    list_ele_t *left = start;
+    list_ele_t *right = left->next;
+    left->next = NULL;
+
+    left = sort(left);
+    right = sort(right);
+
+    for (list_ele_t *merge = NULL; left || right;) {
+        if (!right || (left && strcmp(left->value, right->value) < 0)) {
+            if (!merge) {
+                start = merge = left;
+            } else {
+                merge->next = left;
+                merge = merge->next;
+            }
+            left = left->next;
+        } else {
+            if (!merge) {
+                start = merge = right;
+            } else {
+                merge->next = right;
+                merge = merge->next;
+            }
+            right = right->next;
+        }
+    }
+    return start;
 }
